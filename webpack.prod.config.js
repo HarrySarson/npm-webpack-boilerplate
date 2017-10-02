@@ -9,7 +9,9 @@ const optimizingPlugins = [
   }),
   new webpack.optimize.OccurrenceOrderPlugin,
   new webpack.optimize.UglifyJsPlugin,
-  new HtmlWebpackPlugin(),
+  new HtmlWebpackPlugin({
+    template: './src/index.ejs',
+  }),
 ];
 
 webpackSettings.plugins = optimizingPlugins;

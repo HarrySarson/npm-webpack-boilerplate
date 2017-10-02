@@ -11,6 +11,9 @@ module.exports = {
     'babel-polyfill',
     './src',
   ],
+  externals: {
+    mathjax: 'MathJax',
+  },
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: '[name].bundle.js',
@@ -57,6 +60,8 @@ module.exports = {
   plugins: [
     new webpack.NoEmitOnErrorsPlugin(),
     new webpack.HotModuleReplacementPlugin(),
-    new HtmlWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: './src/index.ejs',
+    }),
   ],
 };

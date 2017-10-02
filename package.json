@@ -61,7 +61,15 @@
   "directories": {
     "test": "test"
   },
-  "dependencies": {},
+  "dependencies": {
+    "browsernizr": "^2.2.0",
+    "jquery": "^3.2.1",
+    "jquery-mousewheel": "^3.1.13",
+    "mathjax": "^2.7.2",
+    "react-dom": "^16.0.0",
+    "react": "^16.0.0",
+    "sylvester": "0.0.21"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/JeffGuKang/npm-webpack-boilerplate"
