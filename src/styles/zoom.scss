@@ -1,0 +1,250 @@
+$top-bot-height: 40px;
+$slider-height: 40px;
+$pad-fraction: 0.15;
+$triangle-fraction: 0.2;
+$slider-inner-height: $slider-height * (1 - 2*$triangle-fraction);
+$triangle-height: $slider-height*$triangle-fraction;
+
+@import "mixins/triangles";
+
+
+%all-divs{
+    text-align: center;
+    white-space: nowrap;
+    position: relative;
+}
+
+.cursor-pointer{
+    cursor: pointer;
+}
+ 
+div[class^="zoom"]{
+    .zcomp{
+        &-bar{
+            @extend %all-divs;
+            overflow: visible;
+            z-index: 2;
+        }
+        &-top{
+            @extend %all-divs;
+        }
+        &-bot{
+            @extend %all-divs;
+        }
+        &-slide{
+            @extend %all-divs; 
+            cursor: pointer;
+        }
+        &-top, &-bot{
+            z-index: 1;
+        }
+    }
+}
+
+//
+//  $args:  class-ext: (optional, string) if there are multiple zoom bars on a page
+//                      include @zoom twice providing a different class-ext each time,
+//                      alternatively, if a .zoom class already exists use this to avoid problems
+//         
+//          colors: (required, map) map defining
+//              outside: (required) colour of border,
+//              buttons: (optional) colour of top/bottom buttons defaults to the same colour as outside,
+//              inside: (required) colour of bar,
+//              slider: (required) colour of slider,
+//              buttons-text (required) colour of text in top and bottom buttons,
+//              slider-text: (required) colour of text in the slider
+//
+//          width: (required, length) width of the whole zoom div
+//          height: (required, length) height of the whole zoom div
+//          orient: (optional, string) vertical or horizontal (default is vertical)
+//
+//
+//
+@mixin zoom($args){
+
+    $class-name: zoom;
+    
+    @if(map-has-key($args,class-ext)){
+        $class-name: zoom-#{map-get($args,class-ext)};
+    }
+    
+    
+    $button-color: if(map-has-key(map-get($args,colors),buttons), 
+                    map-get(map-get($args,colors),buttons), 
+                    map-get(map-get($args,colors),outside));
+    $button-hover-color: if(map-has-key(map-get($args,colors),buttons-hover), 
+                            map-get(map-get($args,colors),buttons-hover), 
+                            $button-color);
+                            
+    $orient: if(map-has-key($args, orient), map-get($args, orient), vertical);
+    
+    
+    .#{$class-name}{
+        background: map-get(map-get($args,colors),outside);
+        width: map-get($args,width);
+        height: map-get($args,height);
+        
+        
+        .zcomp{
+            @mixin top-bot($top-bot){
+                $top: if($top-bot == top, true, false);
+                $op: if($top, bottom, top);
+                @include triangle(  $side:   $top-bot,
+                                    $color:  map-get(map-get($args,colors),outside),
+                                    $width:  map-get($args,width)*(1.05 - 2*$pad-fraction),
+                                    $height: $triangle-height,
+                                    $in-out: inv-in );
+                @include triangle(  $side:   $op,
+                                    $color:  map-get(map-get($args,colors),inside),
+                                    $width:  map-get($args,width)*(1 - 2*$pad-fraction),
+                                    $height: $triangle-height,
+                                    $in-out: in);
+                
+                cursor: pointer;
+                color: map-get(map-get($args,colors),buttons-text);
+
+                height: $top-bot-height;
+                
+                
+                background-color: $button-color; // IE9
+                background-image: linear-gradient(
+                    to #{$top-bot}, 
+                    $button-hover-color, $button-hover-color 40%,
+                    $button-color 60%, $button-color
+                );
+                background-size: 100% 253%;
+                background-position: 0% #{if($top, 0%, 100%)};
+                transition: background-position 250ms;
+                
+                &.swipe, &:hover{
+                    background-position: 0% #{if($top, 100%, 0%)};
+                    background-color: $button-hover-color;
+                }
+
+            }
+            @mixin left-right($left-right){
+                $left: if($left-right == left, true, false);
+                $op: if($left, right, left);
+                @include triangle(  $side:   $left-right,
+                                    $color:  map-get(map-get($args,colors),outside),
+                                    $width:  $triangle-height,
+                                    $height: map-get($args,height)*(1.05 - 2*$pad-fraction),
+                                    $in-out: inv-in );
+                @include triangle(  $side:   $op,
+                                    $color:  map-get(map-get($args,colors),inside),
+                                    $width:  $triangle-height,
+                                    $height: map-get($args,height)*(1 - 2*$pad-fraction),
+                                    $in-out: in);
+                
+                cursor: pointer;
+                color: map-get(map-get($args,colors),buttons-text);
+
+                width: $top-bot-height;
+                
+                background-color: $button-color; // IE9
+                background-image: linear-gradient(
+                    to #{$left-right}, 
+                    $button-hover-color, $button-hover-color 40%,
+                    $button-color 60%, $button-color
+                );
+                background-size: 253% 100%;
+                background-position: #{ if($left, 0, 100) }% 0%;
+                transition: background-position 250ms;
+                &.swipe, &:hover{
+                    background-position: #{if($left, 100, 0)}% 0%;
+                    background-color: $button-hover-color;
+                }
+            }
+            &-slide{
+                background :map-get(map-get($args,colors),slider) content-box;
+                color: map-get(map-get($args,colors),slider-text);
+            }
+            @if $orient == vertical
+            {
+                $bar-height: map-get($args,height) - $top-bot-height*2;
+                &-top, &-bot{
+                    margin: 0 $pad-fraction*100%;
+                    
+                    line-height: $top-bot-height - $triangle-height*3;
+                    font-size: $top-bot-height - $triangle-height;
+                }
+                &-top {
+                    @include top-bot(top);
+                }
+                &-bot {
+                    @include top-bot(bottom);
+                }
+                &-bar {
+                    margin: 0 $pad-fraction*100%;
+                    background: map-get(map-get($args,colors),inside) content-box;
+                    height: $bar-height;
+                }
+                &-slide {
+                
+                    height: $slider-inner-height;
+                    top: ($bar-height - $slider-inner-height)*0.5;
+                    
+                    line-height: $slider-inner-height;
+                    font-size: $slider-inner-height;
+            
+                    @include triangle(  $side:   top,
+                                        $color:  map-get(map-get($args,colors),slider),
+                                        $width:  map-get($args,width)*(1 - 2*$pad-fraction),
+                                        $height: $triangle-height,
+                                        $in-out: out);
+                    @include triangle(  $side:   bottom,
+                                        $color:  map-get(map-get($args,colors),slider),
+                                        $width:  map-get($args,width)*(1 - 2*$pad-fraction),
+                                        $height: $triangle-height,
+                                        $in-out: out);
+                }
+            }
+            @if $orient == horizontal 
+            {
+                $bar-width: map-get($args,width) - $top-bot-height*2;
+                &-top, &-bot, &-bar {
+                    float: left;
+                    top: $pad-fraction*100%;
+                    height: ( 1 - $pad-fraction*2 ) * map-get($args,height);
+                    
+                    line-height: ( 1 - $pad-fraction*2 ) * map-get($args,height);
+                    font-size: $top-bot-height - $triangle-height;
+                }
+                &-top {
+                    @include left-right(right);
+                }
+                &-bot {
+                    @include left-right(left);
+                }
+                &-bar {
+                    background: map-get(map-get($args,colors),inside) content-box;
+                    
+                    width: $bar-width;
+                }
+                &-slide {
+                
+                    height:      ( 1 - $pad-fraction*2 ) * map-get($args,height);
+                    line-height: ( 1 - $pad-fraction*2 ) * map-get($args,height);
+                    width: $slider-inner-height*2;
+                    font-size: $slider-inner-height/1.5;
+                    
+                    left: ($bar-width - $slider-inner-height*2)*0.5;
+                    
+                    
+                    @include triangle(  $side:   left,
+                                        $color:  map-get(map-get($args,colors),slider),
+                                        $width:  $triangle-height,
+                                        $height: map-get($args,height)*(1 - 2*$pad-fraction),
+                                        $in-out: out);
+                    @include triangle(  $side:   right,
+                                        $color:  map-get(map-get($args,colors),slider),
+                                        $width:  $triangle-height,
+                                        $height: map-get($args,height)*(1 - 2*$pad-fraction),
+                                        $in-out: out);
+                    
+                }
+            }
+        }
+        @content;
+    }
+}

@@ -1,0 +1,9 @@
+$max-width: 775px;
+
+@media screen and (max-width: 775px){
+    .viewer{
+        .math-op{
+            display: none;
+        }
+    }
+}

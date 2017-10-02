@@ -1,0 +1,169 @@
+@mixin asserted($cond,$message){
+    @if($cond == false){
+        @warn $message;
+    }
+}
+
+@mixin outside-triangle($pos,$height,$colors){
+    $side: if($pos == before, left, right);
+    $op: if($pos == before, right, left);
+    /* triangles on sides of div */
+      
+    &:#{$pos} {
+        display: block;
+        content: "";
+
+        position: absolute;
+        top: 0;
+        #{$side}: 0;
+
+        width: 0; 
+        height: 0; 
+
+        border-top: $height*0.5 solid map-get($colors,bg);
+        border-bottom: $height*0.5 solid map-get($colors,bg); 
+        border-#{$op}: $height*0.5 solid transparent;
+    }
+    /* padding to prevent content from overlapping onto the triangles */
+    padding-#{$side}: $height*0.5;
+}
+
+@mixin inside-triangle($pos,$height,$colors){
+
+    $side: if($pos == before, left, right);
+    /* diamonds between divs */
+
+    &:#{$pos} {
+        display:block;
+        content:"";
+                
+        position: absolute;
+        top: 0;
+        #{$side}: 0;
+                
+        width: 0;
+        height: 0;
+                
+        border-top: $height*0.5 solid transparent;
+        border-bottom: $height*0.5 solid transparent; 
+        border-#{$side}: $height*0.5 solid map-get($colors,bg);
+
+    }
+    /* padding to prevent content from overlapping onto the triangles */
+    padding-#{$side}: $height*0.6;
+}
+
+
+@mixin vertical-triangles($side,$color,$width,$in-out){
+    $op: if($side == top, bottom, top);
+    $pseudo: if($side == top, before, after);
+    $half: $width/2;
+    
+    @include asserted($side == top or $side == bottom, "parameter $side must be either top or bottom");
+    @include asserted($in-out == in or $in-out == out or $in-out == inv-in or $in-out == inv-out, 
+        "parameter $in-out must be either in or out");
+    
+    &:#{$pseudo}{ 
+        // An #{$in-out} out triangle on the #{side} side
+        display: block;
+        content: "";
+
+        position: absolute;
+        left: 0;
+        #{$side}: 0;
+
+        width: 0; 
+        height: 0; 
+        
+        @if($in-out == in){
+            border-left: $half solid $color;
+            border-right: $half solid $color; 
+            border-#{$op}: $triangle-height solid transparent;
+        } @else if($in-out == inv-out) {
+            border-left: $half solid transparent;
+            border-right: $half solid transparent; 
+            border-#{$side}: $triangle-height solid $color;        
+        } @else if($in-out == out) {
+            border-left: $half solid transparent;
+            border-right: $half solid transparent;
+            border-#{$op}: $triangle-height solid $color;
+        } @else if($in-out == inv-in) {
+            border-left: $half solid $color;
+            border-right: $half solid $color;
+            border-#{$op}: $triangle-height solid transparent;
+        }
+    }
+    @if($in-out == inv-out){
+        padding-#{$side}: $triangle-height;
+    } @else if($in-out == out){
+        padding-#{$side}: $triangle-height;
+    }
+}
+
+
+@mixin triangle($side,$color,$width,$height,$in-out,$selector:default){
+    $orient:        if($side == top or $side == bottom, v, h);
+
+    $op:            if($side == top, bottom, 
+                        if($side == bottom, top,
+                            if($side == left, right, left)
+                        )
+                    );
+    $pseudo:        if($side == top or $side == left, before, after);
+
+    $adj-side-1:    if($orient == v, left,  top);
+    $adj-side-2:    if($orient == v, right, bottom);
+
+    $half-across:   if($orient == v, $width/2, $height/2);
+    $along:         if($orient == v, $height, $width);
+
+    $selector:      if($selector == default, '&:#{$pseudo}', $selector);
+    
+    @include asserted($side == top or $side == bottom or $side == left or $side == right,
+        "#{$side} is not a valid value for $side, it must be either top, bottom, left or right");
+    @include asserted($in-out == in or $in-out == out or $in-out == inv-in or $in-out == inv-out, 
+        "#{$in-out} is not a valid value for $in-out, it must be either in, inv-out, out or inv-in");
+    
+    #{$selector}{ 
+        // An #{$in-out} out triangle on the #{side} side
+        display: block;
+        content: "";
+
+        position: absolute;
+
+        #{$adj-side-1}: 0;
+
+        width: 0; 
+        height: 0; 
+        
+        @if($in-out == in){
+            #{$side}: 0;
+
+            border-#{$adj-side-1}:  $half-across solid transparent;
+            border-#{$adj-side-2}:  $half-across solid transparent; 
+            border-#{$side}:          $along     solid $color;
+        } @else if($in-out == inv-out) {
+            #{$side}: - $along;
+
+            border-#{$adj-side-1}:  $half-across solid $color;
+            border-#{$adj-side-2}:  $half-across solid $color; 
+            border-#{$side}:        $along       solid transparent;        
+        } @else if($in-out == out) {
+            #{$side}: - $along;
+
+            border-#{$adj-side-1}:  $half-across solid transparent;
+            border-#{$adj-side-2}:  $half-across solid transparent;
+            border-#{$op}:          $along       solid $color;
+        } @else if($in-out == inv-in) {
+            #{$side}: 0;
+
+            border-#{$adj-side-1}:  $half-across solid $color;
+            border-#{$adj-side-2}:  $half-across solid $color;
+            border-#{$op}:          $along       solid transparent;
+        }
+    }
+    @if($in-out != out){
+        padding-#{$side}: $along;
+    }
+}
+

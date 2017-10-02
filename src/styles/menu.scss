@@ -1,0 +1,236 @@
+  
+$swipe-time: 0.4s;
+
+@import 'mixins/triangles';
+    
+/* Creates a menu with clickable cells
+ *
+ * @param $color {map} - map defining the color of the table, following values must be defined:
+ *      bg, colour of the body of the menu
+ *      cell, background colour of each cell
+ *      cell-hover, background colour of a cell when cursor is over it
+ *      text, colour of text in cells
+ *      text-hover, colour of text when cursor is over the cell
+ *      
+ *
+ *
+ */
+@mixin menu($colors,$font-size) {
+
+    $cell-border-width: 0.25 * $font-size;
+    $cell-height: 2.5 * $font-size;
+    
+    .row{
+        display: table;
+        table-layout: fixed;
+        width: 100%;
+
+        > div{
+            display: table-cell;
+            width: 100%;
+        }
+        p{
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+    .menu{
+        background: map-get($colors,bg) content-box;
+        //overflow: hidden;
+
+        p{
+            color: map-get($colors,text);
+        }
+        .row {
+            border: $cell-border-width solid transparent;
+            border-style: solid solid none solid;
+            &:last-child{
+                border-style: solid;
+            }
+            & > div{
+                position: relative;
+                background: map-get($colors,cell) padding-box;
+                
+                border: $cell-border-width/2 solid transparent;
+                border-style: none solid;
+                line-height: $cell-height;
+                
+                &:first-child{
+                    border-left-width: 0;
+                }
+                &:last-child{
+                    border-right-width: 0;
+                }
+            }
+            &:nth-child(2n) > div{                    
+                @include triangle(  $side:   left,
+                                    $color:  map-get($colors,bg),
+                                    $width:  $cell-height/2,
+                                    $height: $cell-height,
+                                    $in-out: inv-in );
+                @include triangle(  $side:   right,
+                                    $color:  map-get($colors,bg),
+                                    $width:  $cell-height/2,
+                                    $height: $cell-height,
+                                    $in-out: in );
+            }
+            &:nth-child(2n+1) > div{
+                @include triangle(  $side:   left,
+                                    $color:  map-get($colors,bg),
+                                    $width:  $cell-height/2,
+                                    $height: $cell-height,
+                                    $in-out: in );
+                @include triangle(  $side:   right,
+                                    $color:  map-get($colors,bg),
+                                    $width:  $cell-height/2,
+                                    $height: $cell-height,
+                                    $in-out: inv-in );
+            }
+        }
+        .buttons.live {
+            $normal-bg: map-get($colors,cell);
+            $hover-bg: map-get($colors,cell-hover);
+            
+            & > div{                
+                /* if linear-gradient not supported then background color is already set in .viewer .top .row div */
+                background-image: linear-gradient(
+                    to right, $normal-bg, $normal-bg 33.3%, $hover-bg 33.3%, $hover-bg 66.7%, $normal-bg 66.7%, $normal-bg
+                    );
+
+                background-position: 0% 0%;
+                background-size: 310% 100%;
+                cursor: pointer;
+                &:hover{
+                    p{
+                        color: map-get($colors,text-hover);
+                    }
+                    /* change bg color as a fall back is linear gradients not supported*/
+                    background-color: $hover-bg;
+                }                
+                &:active{
+                    p{
+                        font-weight: bold;
+                    }
+                }
+            }            
+            &:nth-child(2n + 1) > div{
+                /* swipe left, i know some where the labels got swapped */
+                &:hover{
+                    p{
+                        animation: left-bump $swipe-time ease;
+                    }
+                    animation: right-swipe-1 $swipe-time ease forwards !important;
+                }
+                &.unhover{
+                    /* class to fire animations will be added
+                        to the div with jquery after the page has loaded*/
+                    animation: right-swipe-2 $swipe-time ease;
+                }
+            }
+            &:nth-child(2n) > div{
+                /* swipe right, i know some where the labels got swapped */
+                &:hover{
+                    p{
+                        animation: right-bump $swipe-time ease forwards;
+                    }
+                      animation: left-swipe-1 $swipe-time ease forwards !important;
+                }
+                &.unhover{
+                    /* class to fire animations will be added
+                        to the div with jquery after the page has loaded*/
+                    animation: left-swipe-2 $swipe-time ease;
+                }
+            }   
+        }
+    }
+}
+
+@mixin bottom($font-size) { 
+    $cell-height: 2.5 * $font-size;
+    
+    .row { 
+        $bg-opac: $color-secondary-2-2;
+        height: 100%;
+                
+        padding-right: $pad-right + $panel-width - $panel-overlap;
+        padding-bottom: $pad-bot + $panel-overlap;
+        padding-left: $panel-width*0.1;
+        
+        > div{    
+            border: $cell-height*0.3 solid transparent;
+            border-top-style: none;
+            border-bottom-style: none;
+                                
+            background-clip: padding-box;
+            background-color: $bg-opac;
+
+            position: relative;
+            line-height: $cell-height;
+            
+            @mixin triangles($pos){
+                $side: if($pos == before, left, right);
+                $op: if($pos == before, right, left);
+                $tilt: if($pos == before, 0, 1);
+                /* triangles on #{side} of div */
+
+                &:#{$pos} {
+                    display: block;
+                    content: "";
+
+                    position: absolute;
+
+                    top: 0;
+                    #{$side}: -$bot-height*0.3;
+
+                    width: 0; 
+                    height: 0; 
+                    /* $cell-height is defined in menu.scss, need to change that     */
+                    border-top: $cell-height*$tilt solid transparent;
+                    border-bottom: $cell-height*(1-$tilt) solid transparent; 
+                    border-#{$op}: $bot-height*0.3 solid $bg-opac; 
+                }
+            }
+            &:first-child:before{
+                display: none;  
+            }
+            @include triangles(before);
+            @include triangles(after);
+            
+            &:last-child{
+                border-right-style: none;
+            }
+            &:first-child{
+                border-left-style: none;
+            }
+        }
+    }
+}
+
+@keyframes right-bump {
+  0% {  }
+  25% { transform: translateX(5px); }
+  75% { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+@keyframes left-bump {
+  0% {  }
+  25% { transform: translateX(-3px); }
+  75% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}
+@keyframes right-swipe-1 {
+  0% { background-position: 100% 0%; }
+  100% { background-position: 50% 0%;}
+}
+@keyframes right-swipe-2 {
+  0% {  background-position: 50% 0%; }
+  100% { background-position: 0% 0%;}
+}
+@keyframes left-swipe-1 {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 50% 0%;}
+}
+@keyframes left-swipe-2 {
+  0% {  background-position: 50% 0%; }
+  100% { background-position: 100% 0%;}
+}

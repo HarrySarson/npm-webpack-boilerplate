@@ -1,0 +1,86 @@
+﻿<!DOCTYPE html>
+
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta content="utf-8" http-equiv="encoding">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Curve Plotter</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sylvester/0.1.3/sylvester.js"></script>
+
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<link rel="shortcut icon" href="images/logo.png">
+</head>
+<body>
+
+<div class="menu shower no-click minified" id="showmenu">
+    <div class="row buttons">
+        <div><p>Menu</p></div>
+    </div>
+</div>
+
+
+<div class="viewer minified hidden">
+    <div class="table-main">
+        <div class="menu top no-click"  id="menuOptions">
+            <div class="row math-op">
+                <div class="coor">
+                    <p class="selectable">
+                        (<span class="coorX">0.00</span>,<span class="coorY">0.00</span>)
+                    </p>
+                </div>
+                <div id="formula">
+                    <p class="selectable" id="math-output"> </p>
+                </div>
+            </div>
+            <div class="row buttons">
+                <div><p>Hide</p></div>
+                <div><p>Only Last Curve</p></div>
+                <div><p>Select Mode</p></div>
+                <div><p>Order</p></div>
+                <div><p>Reset</p></div>
+            </div>
+        </div>
+        
+        <div class="mode-holder">
+            <div class="box max-order no-click faded hidden" id="maxOrder"> 
+                <div class="row">
+                    <div><p> 
+                        Max Order = <span id="orderDisplay">&infin;</span>
+                    </p></div> 
+                </div>
+                <div class="row">
+                    <span><div>
+                        <div class="zoom-order"></div>
+                    </div><span>
+                </div>
+            </div>
+            <div class="box modes no-click faded hidden" id="modeSelect"></div>
+            <div class="zoom-1 no-click"></div>
+        </div>
+        
+        <div class="footer menu">
+        
+        </div>
+        
+    </div>
+    <div class="panel no-click">
+    </div>
+</div>
+
+<canvas id="plottedCanvas" width="20" height="20">
+Your browser does not support the HTML5 canvas tag!</canvas>
+
+
+
+<div id="overlay" style="display: none;">
+    <div id="modeOptions" style="display: block;">
+    </div>
+</div>
+
+
+</body></html>

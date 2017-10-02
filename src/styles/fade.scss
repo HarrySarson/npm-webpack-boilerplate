@@ -1,0 +1,76 @@
+
+$viewer-hide-time: 1s;
+$viewer-timing-func: ease-in-out;
+
+@mixin fade-show-menu{
+    .mode-holder, .panel{
+        transform: translate(0,0);
+        opacity: 1;
+        transition: transform $viewer-hide-time*0.5 $viewer-timing-func, opacity $viewer-hide-time*0.5   $viewer-timing-func;
+    }
+    .zoom-1{
+        opacity: 1;
+        transition: opacity $viewer-hide-time*0.5 $viewer-hide-time*0.5 $viewer-timing-func;
+    
+    }
+    .top, .footer{
+        transform: translate(0,0);
+        opacity: 1;
+        transition: transform $viewer-hide-time*0.5 $viewer-hide-time*0.5 $viewer-timing-func, 
+            opacity $viewer-hide-time*0.5 $viewer-hide-time*0.5 $viewer-timing-func;
+    }
+}
+@mixin fade-hide-menu{
+    .footer{
+        transform: translate(0,100px);
+        opacity: 0;
+        transition: transform $viewer-hide-time*0.5 $viewer-timing-func, opacity $viewer-hide-time*0.5 $viewer-timing-func;  
+        
+    }
+    .top{
+        transform: translate(0,-100px);
+        opacity: 0;
+        transition: transform $viewer-hide-time*0.5 $viewer-timing-func, opacity $viewer-hide-time*0.5 $viewer-timing-func;  
+    }
+    .modes, .max-order{
+        transform: translate(-100px,0);
+        opacity: 0;
+        transition: transform $viewer-hide-time*0.5 $viewer-hide-time*0.5 $viewer-timing-func, 
+            opacity $viewer-hide-time*0.5 $viewer-hide-time*0.5 $viewer-timing-func;
+    }
+    .panel{
+        transform: translate(100px,0);
+        opacity: 0;    
+        transition: transform $viewer-hide-time*0.5 $viewer-hide-time*0.5 $viewer-timing-func, 
+            opacity $viewer-hide-time*0.5 $viewer-hide-time*0.5 $viewer-timing-func; 
+    }
+    .zoom-1{
+        opacity: 0;    
+        transition: opacity $viewer-hide-time*0.5 $viewer-timing-func; 
+    }
+}
+
+.hidden{
+    display: none;
+}
+
+.viewer {
+    @include fade-show-menu;
+    &.minified {
+        @include fade-hide-menu;
+    }
+}
+
+
+.shower{
+    opacity: 0;
+    transform: translateX(-100px);
+    transition: transform $viewer-hide-time*0.5 $viewer-hide-time*0.5 $viewer-timing-func, 
+        opacity $viewer-hide-time*0.5 $viewer-hide-time*0.5 $viewer-timing-func; 
+    
+    &.minified{
+        transform: translateX(0);
+        opacity: 1; 
+        transition: transform $viewer-hide-time $viewer-timing-func, opacity $viewer-hide-time $viewer-timing-func; 
+    }
+}

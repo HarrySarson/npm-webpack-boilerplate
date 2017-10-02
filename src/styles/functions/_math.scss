@@ -1,0 +1,89 @@
+    // some constants
+$M_PI: 3.14159265358979323846;	// pi */
+ 
+$M_PI_2: 1.57079632679489661923;	// pi/2 
+$M_PI_4: 0.78539816339744830962;	// pi/4 
+$M_PI_6: 0.52359877559829887307;	// pi/6 
+$M_1_PI: 0.31830988618379067154;	// 1/pi 
+$M_2_PI: 0.63661977236758134308;	// 2/pi 
+$M_SQRT3: 1.7320508075688772935;    // 2^0.5 
+
+@function int-pow($b,$int-e){
+    @if $int-e < 0 {
+        @return 1 / inbt-pow($b,-$int-e);
+    }
+    $val: 1;
+    @while $int-e > 0 {
+        $val: $val * $b;
+        $int-e: $int-e - 1;
+    }
+    @return $val;
+}
+
+// returns arc tangent of x
+@function atan($x){
+    /* error check */
+    @if type-of($x) != "number" {
+        @error "cannot compute the arc tan of `#{$x}` as it is a #{type-of($x)} not a number.";
+        @return false;
+    }
+
+
+    /* atan(x) == -atan(-x) so deal with negative argument */
+    @if $x<0 {
+        @return - atan(-$x);
+    }
+    /* atan(x) == pi/2 - atan(1/x) so deal with argument greater than one */
+    @if $x>1 {
+        @return $M_PI_2 - atan(1/$x);
+    }
+    /* atan(x) == pi/6 + atan((sqrt(3)*x - 1)/(sqrt(3) + x))  so deal with argument greater than 2 - sqrt(3) */
+    @if $x>2-$M_SQRT3 {
+        @return $M_PI_6 + atan(($M_SQRT3*$x - 1)/($M_SQRT3 + $x));
+    }
+    /* series for atan: https://en.wikipedia.org/wiki/Inverse_trigonometric_functions#Infinite_series */
+
+    /*
+        atan(x) = sum from n=0 to infinity of (2^(2n)*(n!)^2*x^(2n+1))/((2n+1)!*(1+x^2)^(n+1))
+    */
+    $val: 0;
+    $nfact: 1;
+    $twonp1fact: 1;
+    @for $n from 0 through 5 {
+        @if $n > 0 {
+            $nfact: $nfact * $n;
+            $twonp1fact: $twonp1fact * 2*$n;
+        }
+        $twonp1fact: $twonp1fact * (2*$n+1);
+        $val: $val + (int-pow(2,2*$n) * $nfact*$nfact * int-pow($x,2*$n+1)) / ($twonp1fact * int-pow(1+$x*$x,$n+1));
+    }
+    @return $val;
+}
+
+@function atan2($y,$x){
+    /*                  atan(y/x)               if x>0
+                        atan(y/x) + pi          if x<0 && y>=0
+        atan2(y,x) =    atan(y/x) - pi          if x<0 && y<0
+                        pi/2                    if x=0 && y>0
+                        -pi/2                   if x=0 && y<0
+                        0                       if x=0 && y=0
+
+    */
+    @if $x == 0 {
+        @if $y == 0 {
+            @return 0;
+        } @else if $y > 0 {
+            @return $M_PI_2;
+        } @else { /* $y < 0 */  
+            @return 0 - $M_PI_2;
+        }
+    } @else if $x<0 {
+        @if $y >= 0 {
+            @return atan($y/$x) + $M_PI;
+        } @else {  /* $y < 0 */
+            @return atan($y/$x) - $M_PI;
+        }
+    } @else {  /* $x > 0 */
+        @return atan($y/$x);
+    }
+}

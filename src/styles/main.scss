@@ -1,0 +1,255 @@
+
+@import "themes/color";
+@import "functions/math";
+
+@import "menu";
+@import "fade";
+@import "small";
+
+@import "zoom";
+
+@import "coor";
+
+
+$panel-width: 120px;
+$bot-height: 40px;
+
+$panel-overlap: $panel-width * 0.1;
+$pad-right: $panel-width * 0.3;
+$pad-top: $panel-overlap + 10px;
+$pad-bot: $bot-height * 0.5 - $panel-overlap;
+$modes-show-time: 0.2s;
+$modes-hide-time: 1s;
+
+$font-size: 20px;
+
+
+@include menu((
+    bg: $color-primary-0,
+    cell: $color-complement-1,
+    text: $color-complement-4,
+
+    cell-hover: $color-primary-4,
+    text-hover: $color-complement-1
+), $font-size);
+
+.notransition{
+    transition: none !important;
+}
+
+body{
+    font: $font-size Verdana, Geneva, sans-serif;
+}
+
+body, html
+{
+	margin: 0;
+	padding: 0;
+    width: 100%;
+    height: 100%;
+	overflow: hidden;
+    box-sizing: border-box;
+}
+*, *:before, *:after {
+    box-sizing: inherit;
+    user-select: none;
+}
+
+#math-output{
+    padding-left: 5px;
+}
+
+canvas
+{
+	cursor: crosshair;
+	position: fixed;
+    //background: no-repeat center/100% url(http://cdn.v-harness.com/wp-content/uploads/2015/03/tree.png);
+}
+
+.viewer, canvas{
+    
+    transform-origin: 0 0 0;
+
+    transition: transform 100ms;
+
+}
+
+@include zoom((
+    class-ext: 1, 
+    colors: ( 
+        outside: $color-secondary-1-0, 
+        buttons: $color-secondary-1-3,
+        buttons-hover: $color-secondary-1-4,
+        inside: $color-complement-1, 
+        slider: $color-secondary-1-4,
+        buttons-text: $color-complement-1,
+        slider-text: $color-complement-1
+    ),
+    width: $panel-width,
+    height: 400px
+)){
+    float: right;
+    margin-top: $bot-height;
+}
+
+@include zoom((
+    class-ext: order, 
+    colors: ( 
+        outside: $color-primary-0, 
+        buttons: $color-complement-4,
+        buttons-hover: $color-primary-4,
+        inside: $color-complement-1, 
+        slider: $color-complement-4,
+        buttons-text: $color-complement-1   ,
+        slider-text: $color-complement-1
+    ),
+    width: 490px,
+    height: 2.5 * $font-size,
+    orient: horizontal
+)){
+}
+
+.panel{
+    position: absolute;
+    z-index: 2;
+    top: $pad-top;
+    right: $pad-right;
+    bottom:  $pad-bot;
+    background-clip: content-box;
+    background-color: $color-secondary-1-0;
+    width: $panel-width;
+    /* use mixins defined in zoom.scss */
+    @include vertical-triangles(top, $color-secondary-1-0, $panel-width, out);
+    @include vertical-triangles(bottom, $color-secondary-1-0, $panel-width, out);
+}
+
+.footer{
+    display: table-row;
+    height: 1px; //hack
+    position: relative;
+    z-index: 1;
+    @include bottom($font-size);
+}
+
+
+p{
+    text-align: center;
+    white-space: nowrap;
+    padding: 0;
+    margin: 0;
+}
+.sup{
+    %both{
+        font-size: smaller;
+    }
+    &:first-child{
+        @extend %both;    
+    }
+    &:last-child{
+        @extend %both;
+        display: inline-block;
+        position: relative;
+        top: -0.2em;
+    }
+}
+
+.selectable{
+    user-select: text;
+}
+.shower{
+    position: absolute;
+    z-index: 1;
+    top: $pad-top - $panel-overlap;
+    left: 2.5%;
+    width: 150px;
+}
+.no-click{
+    pointer-events: auto;
+}
+
+#math-output{
+    text-overflow: clip;
+    text-align: left;
+    font-size: smaller;
+    position: absolute;
+    top: 0px;
+    width: 100%;
+}
+
+@include coor;
+    
+.viewer{
+    position:fixed;
+    z-index: 1;
+    pointer-events: none;
+    .table-main{
+        height: 100%;
+        width: 100%;
+        display: table;
+        table-layout: fixed;
+        position: relative;
+    }
+    
+    .top{
+        position: relative;
+        z-index: 3;
+        width: 100%; 
+        padding: $pad-top - $panel-overlap $pad-right + $panel-overlap 0 2.5%;
+    }
+    
+    .mode-holder{
+        width: 100%;
+        padding: 0 $pad-right 0 10%;
+        position: relative;
+        z-index: 3;
+        &:after{
+            content: "";
+            display: block;
+            clear: both;
+        }
+    }
+    .box{
+        @extend .menu;
+        
+        position: absolute;
+        width: 500px;
+        float: left;
+        overflow: hidden;
+        margin-top: $bot-height*2;
+        
+        transition: opacity $modes-show-time*5 ease-out;
+        
+        .row:nth-child(2n) {
+            /* swipe-in right */
+            animation: move-row-right $modes-show-time reverse ease-in forwards;
+        }
+        .row:nth-child(2n + 1) {
+            /* swipe-in left */
+            animation: move-row-left $modes-show-time reverse ease-in forwards;
+        }
+    }
+    .faded{
+        opacity: 0;
+        transition: opacity $modes-hide-time*0.75 $modes-hide-time*0.25 ease-in; // delay fade so rows hide first, cascading so overrides
+        .row{
+            opacity: 0;
+            transition: opacity $modes-hide-time*0.75 ease-in; // hide row first
+            &:nth-child(2n) {
+                /* swipe-out left */
+                animation: move-row-left $modes-hide-time normal ease-in forwards;
+            }
+            &:nth-child(2n + 1) {
+                /* swipe-out right */
+                animation: move-row-right $modes-hide-time normal ease-in forwards;
+            }
+        }
+    }    
+}
+@keyframes move-row-right{
+    from { transform: translateX(0px); }
+    to { transform: translateX(100px); }
+}
+@keyframes move-row-left{
+    from { transform: translateX(0px); }
+    to { transform: translateX(-100px); }
+}
