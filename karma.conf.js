@@ -19,7 +19,7 @@ module.exports = function (config) {
       { pattern: 'tests.webpack.js', watched: false }
     ],
     frameworks: [
-      'jasmine',
+      'mocha',
     ],
     preprocessors: {
       'tests.webpack.js': ['webpack'],
