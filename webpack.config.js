@@ -21,12 +21,24 @@ module.exports = {
   module: {
     rules: [
       {
-        test: [/\.js?$/],
+        test: /\.jsx?$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
-        query: {
-          presets: ['es2015'],
-        },
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              presets: [
+                ['env', {
+                  targets: {
+                    browsers: ['last 2 versions'],
+                  },
+                }],
+                'react',
+              ],
+            },
+          },
+         // 'eslint-loader',
+        ],
       },
       {
         test: /\.html$/,
