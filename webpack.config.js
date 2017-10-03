@@ -62,6 +62,7 @@ module.exports = {
     new webpack.HotModuleReplacementPlugin(),
     new HtmlWebpackPlugin({
       template: './src/index.ejs',
+      favicon: './src/images/logo.png',
     }),
   ],
 };
